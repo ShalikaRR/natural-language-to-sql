@@ -1,0 +1,43 @@
+# Environment & Secrets (NEVER commit actual API keys or credentials)
+.env
+.env.local
+*.env
+
+# Python Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# User Uploaded Databases & Runtime Artifacts
+uploads/*
+!uploads/.gitkeep
+*.log
+*.tmp
+*.temp
+
+# OS & Editor Artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Spider Dataset: Exclude 1.75 GB dataset while preserving the lightweight college_2.sqlite demo database
+spider_data/*
+!spider_data/database/
+spider_data/database/*
+!spider_data/database/college_2/
+spider_data/database/college_2/*
+!spider_data/database/college_2/college_2.sqlite
+
+/scratch/
+/scratch_chrome_cdp/
+/scratch_chrome_profile/
+/test_chrome.png

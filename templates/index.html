@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natural Language SQL Assistant | AI-Powered Database Query System</title>
+    
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #060b17;
+            --secondary-navy: #0f172a;
+            --panel-bg: rgba(13, 21, 38, 0.72);
+            --panel-border: rgba(56, 189, 248, 0.18);
+            --panel-border-hover: rgba(56, 189, 248, 0.38);
+            --accent-cyan: #06b6d4;
+            --accent-blue: #38bdf8;
+            --accent-electric: #2563eb;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--primary-navy);
+            background-image: 
+                radial-gradient(ellipse at 85% 15%, rgba(6, 182, 212, 0.14) 0%, transparent 50%),
+                radial-gradient(ellipse at 15% 85%, rgba(37, 99, 235, 0.16) 0%, transparent 60%),
+                linear-gradient(180deg, rgba(6, 11, 23, 0.82) 0%, rgba(9, 16, 35, 0.86) 50%, rgba(5, 9, 20, 0.92) 100%),
+                url('/static/images/bg-ai-analytics.jpg');
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Top Navigation Header */
+        .navbar-custom {
+            background: rgba(7, 12, 24, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+            padding: 0.9rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .brand-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            border-radius: 10px;
+            color: white;
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+        }
+
+        .brand-title {
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .brand-subtitle {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 1px;
+        }
+
+        /* Status Badge with Pulsing Dot */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            color: #34d399;
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+            transition: all 0.2s ease;
+        }
+
+        .status-badge.custom-db {
+            background: rgba(6, 182, 212, 0.14);
+            border-color: rgba(56, 189, 248, 0.4);
+            color: #38bdf8;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulseDot 2s infinite;
+        }
+
+        .pulse-dot.custom-dot {
+            background-color: #06b6d4;
+            box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7);
+            animation: pulseDotCyan 2s infinite;
+        }
+
+        @keyframes pulseDot {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes pulseDotCyan {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(6, 182, 212, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            padding: 2.75rem 1rem 3.25rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(6, 182, 212, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            padding: 0.35rem 0.95rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #38bdf8;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 14px rgba(6, 182, 212, 0.2);
+        }
+
+        .hero-title {
+            font-size: 2.35rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #ffffff 40%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            max-width: 720px;
+            margin: 0 auto;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* Main Container */
+        .main-container {
+            margin-top: -1.25rem;
+            z-index: 10;
+            position: relative;
+        }
+
+        /* Futuristic Glassmorphic Cards */
+        .app-card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-radius: 1rem;
+            border: 1px solid var(--panel-border);
+            box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            padding: 1.5rem;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .app-card:hover {
+            border-color: var(--panel-border-hover);
+            box-shadow: 0 16px 42px 0 rgba(0, 0, 0, 0.55), 0 0 24px rgba(6, 182, 212, 0.12);
+        }
+
+        /* Active Database Quick Status Card */
+        .active-db-card {
+            background: rgba(10, 17, 34, 0.65);
+            border: 1px solid rgba(56, 189, 248, 0.22);
+            border-radius: 0.75rem;
+            padding: 0.9rem 1rem;
+        }
+
+        /* Upload Dropzone */
+        .upload-dropzone {
+            border: 1.5px dashed rgba(56, 189, 248, 0.32);
+            border-radius: 0.85rem;
+            padding: 1.4rem 1.25rem;
+            text-align: center;
+            background: rgba(10, 18, 35, 0.5);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .upload-dropzone:hover, .upload-dropzone.dragover {
+            border-color: #38bdf8;
+            background: rgba(14, 165, 233, 0.12);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+
+        .upload-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(6, 182, 212, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
+        }
+
+        /* Textarea */
+        .textarea-container {
+            position: relative;
+        }
+
+        .question-textarea {
+            width: 100%;
+            background: rgba(7, 13, 27, 0.82);
+            border: 1.5px solid rgba(56, 189, 248, 0.22);
+            border-radius: 0.75rem;
+            padding: 0.9rem 1.1rem;
+            font-size: 1.02rem;
+            color: #f8fafc;
+            resize: vertical;
+            min-height: 85px;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .question-textarea:focus {
+            outline: none;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.18), 0 0 20px rgba(6, 182, 212, 0.15);
+            background: rgba(9, 16, 32, 0.9);
+        }
+
+        .question-textarea::placeholder {
+            color: #64748b;
+        }
+
+        /* Sample Query Buttons */
+        .sample-pill {
+            background: rgba(15, 25, 46, 0.65);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 500;
+            padding: 0.35rem 0.8rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-right: 0.35rem;
+            margin-bottom: 0.45rem;
+        }
+
+        .sample-pill:hover {
+            background: rgba(6, 182, 212, 0.15);
+            border-color: #38bdf8;
+            color: #38bdf8;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+            transform: translateY(-1px);
+        }
+
+        /* Action Buttons */
+        .btn-generate {
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.98rem;
+            padding: 0.7rem 1.6rem;
+            border-radius: 0.65rem;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 18px rgba(2, 132, 199, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .btn-generate:hover:not(:disabled) {
+            background: linear-gradient(135deg, #0ea5e9 0%, #1d4ed8 100%);
+            box-shadow: 0 6px 24px rgba(2, 132, 199, 0.55);
+            transform: translateY(-1px);
+            color: white;
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary-custom {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            color: #e2e8f0;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.45rem 0.95rem;
+            border-radius: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary-custom:hover {
+            background: rgba(56, 189, 248, 0.15);
+            border-color: #38bdf8;
+            color: #38bdf8;
+        }
+
+        /* Schema Explorer Accordion */
+        .schema-accordion .accordion-item {
+            background: rgba(10, 18, 34, 0.65);
+            border: 1px solid rgba(56, 189, 248, 0.14);
+            border-radius: 0.65rem;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+        }
+
+        .schema-accordion .accordion-button {
+            padding: 0.75rem 1rem;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            background: rgba(13, 22, 42, 0.75);
+            box-shadow: none;
+            border: none;
+        }
+
+        .schema-accordion .accordion-button:not(.collapsed) {
+            background: rgba(17, 30, 56, 0.9);
+            color: #38bdf8;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .schema-accordion .accordion-button::after {
+            filter: invert(1) brightness(0.85);
+        }
+
+        .schema-column-list {
+            font-family: 'JetBrains Mono', Consolas, monospace;
+            font-size: 0.82rem;
+            padding: 0.75rem 1rem;
+            background: rgba(6, 11, 23, 0.85);
+        }
+
+        .column-badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.45rem;
+            border-radius: 0.35rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+
+        /* Result Sections & Cards */
+        .result-card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--panel-border);
+            border-radius: 0.85rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            animation: fadeInUp 0.35s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header-styled {
+            background: rgba(13, 22, 42, 0.75);
+            border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+            padding: 0.9rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* AI Answer Card Banner */
+        .ai-answer-card {
+            border-left: 4px solid #06b6d4;
+            background: linear-gradient(180deg, rgba(14, 24, 46, 0.85) 0%, rgba(9, 15, 30, 0.9) 100%);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .ai-answer-content {
+            font-size: 1.15rem;
+            font-weight: 500;
+            color: #f8fafc;
+            line-height: 1.6;
+            padding: 1.25rem;
+        }
+
+        /* Code Block Styling */
+        .code-container {
+            background: rgba(5, 9, 18, 0.92);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            border-radius: 0 0 0.85rem 0.85rem;
+            padding: 1.15rem 1.25rem;
+            position: relative;
+        }
+
+        .sql-code-block {
+            font-family: 'JetBrains Mono', Consolas, monospace;
+            font-size: 0.92rem;
+            color: #38bdf8;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.6;
+        }
+
+        .btn-copy {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            color: #cbd5e1;
+            font-size: 0.78rem;
+            font-weight: 500;
+            padding: 0.3rem 0.7rem;
+            border-radius: 0.4rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-copy:hover {
+            background: rgba(56, 189, 248, 0.2);
+            color: #ffffff;
+            border-color: #38bdf8;
+        }
+
+        /* Security Gate Card */
+        .security-badge-card {
+            background: rgba(6, 95, 70, 0.28);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            color: #a7f3d0;
+            padding: 0.85rem 1.2rem;
+            border-radius: 0.65rem;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Results Table */
+        .table-wrapper {
+            max-height: 380px;
+            overflow-y: auto;
+            position: relative;
+            background: rgba(7, 13, 26, 0.5);
+        }
+
+        .table-custom {
+            margin-bottom: 0;
+            font-size: 0.88rem;
+            color: #f1f5f9;
+        }
+
+        .table-custom th {
+            background: rgba(13, 22, 42, 0.96);
+            color: #38bdf8;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.05em;
+            padding: 0.8rem 1.2rem;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.25);
+        }
+
+        .table-custom td {
+            padding: 0.75rem 1.2rem;
+            color: #e2e8f0;
+            border-bottom: 1px solid rgba(56, 189, 248, 0.08);
+            vertical-align: middle;
+            background: rgba(9, 16, 32, 0.45);
+        }
+
+        .table-custom tbody tr:hover td {
+            background: rgba(56, 189, 248, 0.1);
+            color: #ffffff;
+        }
+
+        /* Error Alert Card */
+        .error-card {
+            background: rgba(153, 27, 27, 0.25);
+            border: 1px solid rgba(248, 113, 113, 0.35);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            color: #fca5a5;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(12px);
+            animation: fadeInUp 0.3s ease forwards;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            background: rgba(7, 12, 24, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(56, 189, 248, 0.12);
+            padding: 1.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-custom">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <div class="brand-logo">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="brand-title">Natural Language SQL Assistant</div>
+                    <div class="brand-subtitle">Ask questions about your database in plain English</div>
+                </div>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2">
+                <div class="status-badge" id="navDbBadge">
+                    <span class="pulse-dot" id="navPulseDot"></span>
+                    <span id="navDbText">Database: college_2 (Demo)</span>
+                </div>
+                <button type="button" class="btn-secondary-custom d-none" id="navResetBtn" onclick="resetToDemo()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                    <span>Switch to Demo</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <header class="hero-banner">
+        <div class="container">
+            <div class="hero-pill">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                </svg>
+                <span>AI-Powered Database Intelligence</span>
+            </div>
+            <h1 class="hero-title">Ask your database anything</h1>
+            <p class="hero-desc">
+                Transform plain English questions into verified, read-only SQLite queries. Use the built-in <strong>college_2</strong> demo database or upload your own SQLite database file.
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="container main-container mb-5">
+
+        <!-- Top Section: Database Workspace & Upload -->
+        <div class="row mb-4">
+            <!-- Upload & Database Management Card -->
+            <div class="col-lg-5 mb-3 mb-lg-0">
+                <div class="app-card h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="fw-bold text-light d-flex align-items-center gap-2">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            <span>Database Workspace</span>
+                        </div>
+                        <span class="badge border" style="background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.3) !important; color: #38bdf8;" id="uploadLimitBadge">Max 25 MB</span>
+                    </div>
+
+                    <!-- Active Database Quick Status Card -->
+                    <div class="active-db-card mb-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small fw-semibold" style="color: #64748b; font-size: 0.72rem; letter-spacing: 0.05em;">CURRENT ACTIVE DATABASE:</div>
+                            <div class="fw-bold text-light fs-6" id="activeDbNameDisplay">college_2.sqlite</div>
+                            <div class="small" style="color: #94a3b8;" id="activeDbDetailsDisplay">11 tables discovered • Read-Only Mode</div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-info d-none" id="cardResetBtn" onclick="resetToDemo()">
+                            Switch to Demo
+                        </button>
+                    </div>
+
+                    <!-- Upload Form & Dropzone -->
+                    <form id="uploadForm">
+                        <div class="upload-dropzone mb-3" id="dropzone" onclick="document.getElementById('dbFileInput').click()">
+                            <input type="file" id="dbFileInput" class="d-none" accept=".db,.sqlite,.sqlite3" onchange="handleFileSelect(this)">
+                            <div class="upload-icon">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                            </div>
+                            <div class="fw-semibold text-light small" id="dropzoneText">Click or Drag & Drop SQLite Database</div>
+                            <div class="text-secondary" style="font-size: 0.78rem;">Supports .sqlite, .db, .sqlite3 (up to 25 MB)</div>
+                        </div>
+
+                        <!-- Selected File Status & Upload Action -->
+                        <div id="fileSelectedBar" class="d-none mb-3 p-2 rounded d-flex justify-content-between align-items-center" style="background: rgba(10, 18, 35, 0.7); border: 1px solid rgba(56, 189, 248, 0.25);">
+                            <div class="text-truncate me-2 small">
+                                <span class="fw-bold text-light" id="selectedFileName">filename.sqlite</span>
+                                <span class="text-secondary ms-1" id="selectedFileSize">(0 KB)</span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-link text-danger p-0 text-decoration-none" onclick="clearSelectedFile()">Cancel</button>
+                                <button type="submit" class="btn btn-sm btn-primary" id="uploadSubmitBtn" style="background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%); border: none;">
+                                    <span id="uploadBtnText">Upload & Load</span>
+                                    <span id="uploadSpinner" class="spinner-border spinner-border-sm d-none"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Upload Alert (Feedback) -->
+                        <div id="uploadAlert" class="alert small py-2 px-3 d-none mb-0" role="alert"></div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Discovered Schema Explorer Card -->
+            <div class="col-lg-7">
+                <div class="app-card h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="fw-bold text-light d-flex align-items-center gap-2">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                                <polyline points="2 17 12 22 22 17"/>
+                                <polyline points="2 12 12 17 22 12"/>
+                            </svg>
+                            <span>Schema Explorer</span>
+                        </div>
+                        <span class="badge border" style="background: rgba(6, 182, 212, 0.15); border-color: rgba(56, 189, 248, 0.35) !important; color: #38bdf8;" id="schemaTableCountBadge">11 Tables Discovered</span>
+                    </div>
+
+                    <p class="small text-secondary mb-2">
+                        Inspect the discovered tables and columns in the active database. Click any table to inspect its schema.
+                    </p>
+
+                    <!-- Scrollable Schema Accordion -->
+                    <div class="flex-grow-1 overflow-auto schema-accordion" id="schemaAccordion" style="max-height: 230px;">
+                        <div class="text-center py-4 text-secondary small">
+                            <div class="spinner-border spinner-border-sm text-info mb-2" role="status"></div>
+                            <div>Loading schema...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Query Input Card -->
+        <section class="app-card mb-4" aria-label="Query Input Form">
+            <form id="queryForm">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label for="questionInput" class="fw-semibold text-light small">
+                            Enter your natural-language question:
+                        </label>
+                        <span class="badge border" style="background: rgba(15, 23, 42, 0.7); border-color: rgba(56, 189, 248, 0.25) !important; color: #38bdf8;" id="queryTargetBadge">Target: college_2.sqlite (11 tables)</span>
+                    </div>
+                    <div class="textarea-container">
+                        <textarea 
+                            class="question-textarea" 
+                            id="questionInput" 
+                            rows="3" 
+                            placeholder="e.g., How many students are there?" 
+                            required
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Sample Questions Carousel/Pills -->
+                <div class="mb-4">
+                    <div class="small fw-semibold text-secondary mb-2" id="sampleQuestionsHeading">Try sample questions:</div>
+                    <div class="d-flex flex-wrap" id="sampleQuestionsContainer">
+                        <!-- Populated by JavaScript based on active database -->
+                    </div>
+                </div>
+
+                <!-- Submit Button Bar -->
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="small text-secondary d-none d-md-block">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1 text-info">
+                            <rect width="18" height="18" x="3" y="3" rx="2"/>
+                            <path d="m9 12 2 2 4-4"/>
+                        </svg>
+                        Read-only safety enforced • Single SELECT & CTE statements only
+                    </div>
+                    <button type="submit" id="submitBtn" class="btn-generate">
+                        <span id="btnIcon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m5 12 7-7 7 7"/>
+                                <path d="M12 19V5"/>
+                            </svg>
+                        </span>
+                        <span id="btnText">Generate Answer</span>
+                        <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Error Card (Hidden initially) -->
+        <div id="errorCard" class="error-card d-none" role="alert">
+            <div class="d-flex align-items-start gap-3">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-danger flex-shrink-0 mt-1">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" x2="12" y1="8" y2="12"/>
+                    <line x1="12" x2="12.01" y1="16" y2="16"/>
+                </svg>
+                <div>
+                    <div class="fw-bold fs-6 mb-1" id="errorTitleText">Unable to complete query</div>
+                    <div id="errorMessageText" class="small">Unable to generate the query. Please try again.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section Container (Hidden initially) -->
+        <div id="resultsSection" class="d-none">
+            
+            <!-- Section Title -->
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold mb-0 text-light">Execution Results</h5>
+                <span class="badge border px-3 py-2" style="background: rgba(13, 21, 38, 0.7); border-color: rgba(56, 189, 248, 0.25) !important; color: #38bdf8;" id="timestampBadge">Just now</span>
+            </div>
+
+            <!-- Card D: AI Natural Language Answer -->
+            <div class="result-card ai-answer-card">
+                <div class="card-header-styled">
+                    <div class="card-header-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2">
+                            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                        </svg>
+                        <span>AI Answer</span>
+                    </div>
+                    <span class="badge border" style="background: rgba(6, 182, 212, 0.15); border-color: rgba(56, 189, 248, 0.35) !important; color: #38bdf8;">Synthesized Response</span>
+                </div>
+                <div class="ai-answer-content" id="aiAnswerText"></div>
+            </div>
+
+            <div class="row">
+                <!-- Card A: Generated SQL -->
+                <div class="col-lg-7 mb-4">
+                    <div class="result-card h-100">
+                        <div class="card-header-styled">
+                            <div class="card-header-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+                                    <polyline points="16 18 22 12 16 6"/>
+                                    <polyline points="8 6 2 12 8 18"/>
+                                </svg>
+                                <span>Generated SQL</span>
+                            </div>
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="badge border" style="background: rgba(15, 23, 42, 0.7); border-color: rgba(56, 189, 248, 0.2) !important; color: #94a3b8;">SQL Generated</span>
+                                <button type="button" class="btn-copy" id="copySqlBtn" onclick="copySql()">
+                                    Copy SQL
+                                </button>
+                            </div>
+                        </div>
+                        <div class="code-container">
+                            <pre class="sql-code-block" id="sqlDisplay"></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card B: Security Validation -->
+                <div class="col-lg-5 mb-4">
+                    <div class="result-card h-100">
+                        <div class="card-header-styled">
+                            <div class="card-header-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+                                </svg>
+                                <span>Security Gate</span>
+                            </div>
+                            <span class="badge border" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(52, 211, 153, 0.35) !important; color: #34d399;">Pre-Execution Gate</span>
+                        </div>
+                        <div class="p-3">
+                            <div class="security-badge-card" id="securityBadgeCard">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="flex-shrink-0">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                    <polyline points="22 4 12 14.01 9 11.01"/>
+                                </svg>
+                                <span id="securityBadgeText">✓ Query passed safety validation</span>
+                            </div>
+                            <div class="small text-secondary mt-3">
+                                <strong class="text-light">Safety Guarantees Enforced:</strong>
+                                <ul class="mb-0 mt-1 ps-3" style="color: #94a3b8;">
+                                    <li>Strictly single statement (no multi-query injection)</li>
+                                    <li>Read-only queries only (blocks INSERT, UPDATE, DROP, PRAGMA)</li>
+                                    <li>Safe CTEs supported (<code>WITH ... SELECT ...</code>)</li>
+                                    <li>SQLite engine enforced with <code>mode=ro</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card C: Query Results Table -->
+            <div class="result-card">
+                <div class="card-header-styled">
+                    <div class="card-header-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+                            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                            <line x1="3" x2="21" y1="9" y2="9"/>
+                            <line x1="3" x2="21" y1="15" y2="15"/>
+                            <line x1="9" x2="9" y1="3" y2="21"/>
+                            <line x1="15" x2="15" y1="3" y2="21"/>
+                        </svg>
+                        <span>Database Records</span>
+                    </div>
+                    <span class="badge border" style="background: rgba(2, 132, 199, 0.25); border-color: rgba(56, 189, 248, 0.4) !important; color: #38bdf8;" id="rowCountTag">0 rows</span>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table table-custom" id="dataTable">
+                        <thead id="tableHead"></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center">
+        <div class="container">
+            <p class="mb-1 fw-semibold text-light">Natural Language to SQL Query System</p>
+            <p class="mb-0 small text-secondary">
+                Powered by Gemini • SQLite • Spider Benchmark Database <code>college_2</code> & Custom Database Uploads
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Frontend Interactive Logic -->
+    <script>
+        // State variables
+        let currentDbId = "default";
+        let currentDbInfo = null;
+
+        const COLLEGE_SAMPLE_QUESTIONS = [
+            "How many students are there?",
+            "List all departments",
+            "Which department has the most students?",
+            "Show students in alphabetical order",
+            "What are the top 5 courses offering the highest number of credits?",
+            "Which instructors in Comp. Sci. earn more than 70,000?"
+        ];
+
+        // Initialize application on load
+        document.addEventListener("DOMContentLoaded", function() {
+            initDropzone();
+            loadDatabaseInfo("default");
+        });
+
+        // Load database metadata and schema
+        async function loadDatabaseInfo(dbId) {
+            try {
+                const response = await fetch(`/api/database-info?db_id=${encodeURIComponent(dbId || "default")}`);
+                const data = await response.json();
+                if (data.success && data.database) {
+                    currentDbInfo = data.database;
+                    currentDbId = currentDbInfo.db_id;
+                    updateDatabaseUI(currentDbInfo);
+                }
+            } catch (err) {
+                console.error("Failed to load database info:", err);
+            }
+        }
+
+        // Update UI elements with active database state
+        function updateDatabaseUI(db) {
+            const isDefault = db.is_default || db.db_id === "default";
+            
+            // Navbar badge
+            const navDbBadge = document.getElementById("navDbBadge");
+            const navPulseDot = document.getElementById("navPulseDot");
+            const navDbText = document.getElementById("navDbText");
+            const navResetBtn = document.getElementById("navResetBtn");
+            const cardResetBtn = document.getElementById("cardResetBtn");
+
+            if (isDefault) {
+                navDbBadge.className = "status-badge";
+                navPulseDot.className = "pulse-dot";
+                navDbText.textContent = `Database: ${db.filename || "college_2.sqlite"} (Demo)`;
+                navResetBtn.classList.add("d-none");
+                cardResetBtn.classList.add("d-none");
+            } else {
+                navDbBadge.className = "status-badge custom-db";
+                navPulseDot.className = "pulse-dot custom-dot";
+                navDbText.textContent = `Database: ${db.filename} (Custom)`;
+                navResetBtn.classList.remove("d-none");
+                cardResetBtn.classList.remove("d-none");
+            }
+
+            // Quick status card
+            document.getElementById("activeDbNameDisplay").textContent = db.filename || "college_2.sqlite";
+            document.getElementById("activeDbDetailsDisplay").textContent = `${db.table_count || 0} tables discovered • Read-Only Mode`;
+
+            // Query card target badge
+            document.getElementById("queryTargetBadge").textContent = `Target: ${db.filename || "college_2.sqlite"} (${db.table_count || 0} tables)`;
+
+            // Render Schema Accordion
+            renderSchemaAccordion(db.tables_metadata || {});
+
+            // Render Sample Questions
+            renderSampleQuestions(isDefault, db.tables || []);
+        }
+
+        // Render Schema Explorer accordion
+        function renderSchemaAccordion(tablesMetadata) {
+            const container = document.getElementById("schemaAccordion");
+            container.innerHTML = "";
+
+            const tableNames = Object.keys(tablesMetadata);
+            document.getElementById("schemaTableCountBadge").textContent = `${tableNames.length} Tables Discovered`;
+
+            if (tableNames.length === 0) {
+                container.innerHTML = '<div class="text-center py-4 text-secondary small">No tables found in this database.</div>';
+                return;
+            }
+
+            tableNames.forEach((tblName, index) => {
+                const tblInfo = tablesMetadata[tblName] || {};
+                const cols = tblInfo.columns || [];
+                const rowCount = tblInfo.row_count != null ? tblInfo.row_count.toLocaleString() : "N/A";
+                const isFirst = index === 0;
+
+                const item = document.createElement("div");
+                item.className = "accordion-item";
+                item.innerHTML = `
+                    <h2 class="accordion-header" id="heading-${index}">
+                        <button class="accordion-button ${isFirst ? '' : 'collapsed'}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${index}" aria-expanded="${isFirst ? 'true' : 'false'}" aria-controls="collapse-${index}">
+                            <div class="d-flex justify-content-between align-items-center w-100 me-2">
+                                <span class="font-monospace fw-bold text-light">${tblName}</span>
+                                <span class="badge border small" style="background: rgba(15, 23, 42, 0.7); border-color: rgba(56, 189, 248, 0.25) !important; color: #94a3b8;">${cols.length} cols • ${rowCount} rows</span>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse-${index}" class="accordion-collapse collapse ${isFirst ? 'show' : ''}" aria-labelledby="heading-${index}">
+                        <div class="accordion-body schema-column-list p-2">
+                            <div class="d-flex flex-wrap gap-1">
+                                ${cols.map(c => `
+                                    <span class="badge border p-1 d-inline-flex align-items-center gap-1" style="background: rgba(15, 25, 48, 0.8); border-color: rgba(56, 189, 248, 0.2) !important; color: #e2e8f0;">
+                                        <span>${c.name}</span>
+                                        <span class="column-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">${c.type || 'ANY'}</span>
+                                        ${c.pk ? '<span class="column-badge" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);">PK</span>' : ''}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Render dynamic sample question pills
+        function renderSampleQuestions(isDefault, tableList) {
+            const container = document.getElementById("sampleQuestionsContainer");
+            container.innerHTML = "";
+
+            if (isDefault) {
+                document.getElementById("sampleQuestionsHeading").textContent = "Try sample questions:";
+                COLLEGE_SAMPLE_QUESTIONS.forEach(q => {
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.className = "sample-pill";
+                    btn.onclick = () => setQuestion(q);
+                    btn.innerHTML = `<span>${q}</span>`;
+                    container.appendChild(btn);
+                });
+            } else {
+                document.getElementById("sampleQuestionsHeading").textContent = "Suggested queries for your database:";
+                if (tableList && tableList.length > 0) {
+                    tableList.slice(0, 5).forEach(t => {
+                        const q1 = `How many records are in ${t}?`;
+                        const btn1 = document.createElement("button");
+                        btn1.type = "button";
+                        btn1.className = "sample-pill";
+                        btn1.onclick = () => setQuestion(q1);
+                        btn1.innerHTML = `<span>Count ${t}</span>`;
+                        container.appendChild(btn1);
+
+                        const q2 = `Show 5 records from ${t}`;
+                        const btn2 = document.createElement("button");
+                        btn2.type = "button";
+                        btn2.className = "sample-pill";
+                        btn2.onclick = () => setQuestion(q2);
+                        btn2.innerHTML = `<span>Preview ${t}</span>`;
+                        container.appendChild(btn2);
+                    });
+                }
+            }
+        }
+
+        function setQuestion(text) {
+            const textarea = document.getElementById("questionInput");
+            textarea.value = text;
+            textarea.focus();
+        }
+
+        // File selection and dropzone logic
+        function initDropzone() {
+            const dropzone = document.getElementById("dropzone");
+            ["dragenter", "dragover"].forEach(name => {
+                dropzone.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.add("dragover");
+                });
+            });
+
+            ["dragleave", "drop"].forEach(name => {
+                dropzone.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.remove("dragover");
+                });
+            });
+
+            dropzone.addEventListener("drop", (e) => {
+                const files = e.dataTransfer.files;
+                if (files && files.length > 0) {
+                    handleSelectedFile(files[0]);
+                }
+            });
+        }
+
+        function handleFileSelect(input) {
+            if (input.files && input.files.length > 0) {
+                handleSelectedFile(input.files[0]);
+            }
+        }
+
+        let selectedFileObj = null;
+
+        function handleSelectedFile(file) {
+            selectedFileObj = file;
+            const validExts = [".sqlite", ".db", ".sqlite3"];
+            const ext = "." + file.name.split(".").pop().toLowerCase();
+            
+            if (!validExts.includes(ext)) {
+                showUploadAlert("Invalid file format. Please upload a .sqlite, .db, or .sqlite3 file.", "danger");
+                clearSelectedFile();
+                return;
+            }
+
+            if (file.size > 25 * 1024 * 1024) {
+                showUploadAlert("File size exceeds 25 MB limit.", "danger");
+                clearSelectedFile();
+                return;
+            }
+
+            const sizeFormatted = file.size > 1024 * 1024 
+                ? (file.size / (1024 * 1024)).toFixed(2) + " MB" 
+                : (file.size / 1024).toFixed(1) + " KB";
+
+            document.getElementById("selectedFileName").textContent = file.name;
+            document.getElementById("selectedFileSize").textContent = `(${sizeFormatted})`;
+            document.getElementById("fileSelectedBar").classList.remove("d-none");
+            hideUploadAlert();
+        }
+
+        function clearSelectedFile() {
+            selectedFileObj = null;
+            document.getElementById("dbFileInput").value = "";
+            document.getElementById("fileSelectedBar").classList.add("d-none");
+        }
+
+        function showUploadAlert(msg, type) {
+            const alert = document.getElementById("uploadAlert");
+            alert.className = `alert alert-${type} small py-2 px-3 mb-0`;
+            alert.textContent = msg;
+            alert.classList.remove("d-none");
+        }
+
+        function hideUploadAlert() {
+            document.getElementById("uploadAlert").classList.add("d-none");
+        }
+
+        // Upload Form Submission
+        document.getElementById("uploadForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            if (!selectedFileObj) return;
+
+            const uploadSubmitBtn = document.getElementById("uploadSubmitBtn");
+            const uploadBtnText = document.getElementById("uploadBtnText");
+            const uploadSpinner = document.getElementById("uploadSpinner");
+
+            uploadSubmitBtn.disabled = true;
+            uploadBtnText.textContent = "Uploading...";
+            uploadSpinner.classList.remove("d-none");
+            hideUploadAlert();
+
+            const formData = new FormData();
+            formData.append("file", selectedFileObj);
+
+            try {
+                const response = await fetch("/api/upload", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || "Failed to upload database.");
+                }
+
+                showUploadAlert(`✓ Successfully loaded "${data.filename}" (${data.table_count} tables discovered)`, "success");
+                clearSelectedFile();
+                
+                // Refresh active database
+                await loadDatabaseInfo(data.db_id);
+
+            } catch (err) {
+                showUploadAlert(err.message || "Upload failed. Please check the file and try again.", "danger");
+            } finally {
+                uploadSubmitBtn.disabled = false;
+                uploadBtnText.textContent = "Upload & Load";
+                uploadSpinner.classList.add("d-none");
+            }
+        });
+
+        // Reset to Demo Database
+        async function resetToDemo() {
+            try {
+                const response = await fetch("/api/reset-database", { method: "POST" });
+                const data = await response.json();
+                if (data.success) {
+                    showUploadAlert("Switched back to college_2 demo database.", "info");
+                    clearSelectedFile();
+                    await loadDatabaseInfo("default");
+                }
+            } catch (err) {
+                console.error("Failed to reset database:", err);
+            }
+        }
+
+        // Copy SQL to clipboard
+        async function copySql() {
+            const sqlText = document.getElementById("sqlDisplay").textContent;
+            if (!sqlText) return;
+            try {
+                await navigator.clipboard.writeText(sqlText);
+                const copyBtn = document.getElementById("copySqlBtn");
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = "Copied!";
+                copyBtn.style.color = "#34d399";
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.style.color = "";
+                }, 2000);
+            } catch (e) {
+                console.error("Clipboard copy failed", e);
+            }
+        }
+
+        // Query Form Submission
+        document.getElementById("queryForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            const question = document.getElementById("questionInput").value.trim();
+            if (!question) {
+                showError("Please enter a question before submitting.");
+                return;
+            }
+
+            const submitBtn = document.getElementById("submitBtn");
+            const btnText = document.getElementById("btnText");
+            const btnIcon = document.getElementById("btnIcon");
+            const btnSpinner = document.getElementById("btnSpinner");
+            const errorCard = document.getElementById("errorCard");
+            const resultsSection = document.getElementById("resultsSection");
+
+            // Loading state
+            submitBtn.disabled = true;
+            btnText.textContent = "Generating SQL...";
+            btnIcon.classList.add("d-none");
+            btnSpinner.classList.remove("d-none");
+            errorCard.classList.add("d-none");
+            resultsSection.classList.add("d-none");
+
+            try {
+                const response = await fetch("/query", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        question: question,
+                        db_id: currentDbId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || "Unable to generate the query. Please try again.");
+                }
+
+                // Render SQL Code Block
+                document.getElementById("sqlDisplay").textContent = data.sql || "N/A";
+
+                // Render Security Validation
+                const securityBadgeCard = document.getElementById("securityBadgeCard");
+                const securityBadgeText = document.getElementById("securityBadgeText");
+                if (data.is_valid) {
+                    securityBadgeCard.className = "security-badge-card";
+                    securityBadgeText.textContent = "✓ Query passed safety validation";
+                } else {
+                    securityBadgeCard.className = "error-card p-3 mb-0";
+                    securityBadgeText.textContent = "✕ Query failed security validation: " + (data.validation_message || "Rejected");
+                }
+
+                // Render AI Answer
+                const aiAnswerText = document.getElementById("aiAnswerText");
+                const formattedAnswer = (data.summary || "").replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                aiAnswerText.innerHTML = formattedAnswer || "Query completed.";
+
+                // Render Results Table
+                const tableHead = document.getElementById("tableHead");
+                const tableBody = document.getElementById("tableBody");
+                tableHead.innerHTML = "";
+                tableBody.innerHTML = "";
+
+                const rowCount = data.row_count || 0;
+                document.getElementById("rowCountTag").textContent = `${rowCount} row${rowCount === 1 ? '' : 's'}`;
+
+                if (data.columns && data.columns.length > 0) {
+                    const trHead = document.createElement("tr");
+                    data.columns.forEach(col => {
+                        const th = document.createElement("th");
+                        th.textContent = col;
+                        trHead.appendChild(th);
+                    });
+                    tableHead.appendChild(trHead);
+
+                    if (data.rows && data.rows.length > 0) {
+                        data.rows.forEach(row => {
+                            const tr = document.createElement("tr");
+                            row.forEach(val => {
+                                const td = document.createElement("td");
+                                td.textContent = val != null ? val : "NULL";
+                                tr.appendChild(td);
+                            });
+                            tableBody.appendChild(tr);
+                        });
+                    } else {
+                        const tr = document.createElement("tr");
+                        const td = document.createElement("td");
+                        td.colSpan = data.columns.length;
+                        td.className = "text-center py-4 text-secondary";
+                        td.textContent = "No data returned for this query.";
+                        tr.appendChild(td);
+                        tableBody.appendChild(tr);
+                    }
+                }
+
+                // Display timestamp
+                document.getElementById("timestampBadge").textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                // Reveal results smoothly
+                resultsSection.classList.remove("d-none");
+
+            } catch (err) {
+                showError(err.message || "Unable to generate the query. Please try again.");
+            } finally {
+                submitBtn.disabled = false;
+                btnText.textContent = "Generate Answer";
+                btnIcon.classList.remove("d-none");
+                btnSpinner.classList.add("d-none");
+            }
+        });
+
+        function showError(msg) {
+            const errorCard = document.getElementById("errorCard");
+            const errorMessageText = document.getElementById("errorMessageText");
+            errorMessageText.textContent = msg;
+            errorCard.classList.remove("d-none");
+            document.getElementById("resultsSection").classList.add("d-none");
+        }
+    </script>
+</body>
+</html>
