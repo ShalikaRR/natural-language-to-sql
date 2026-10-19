@@ -218,3 +218,13 @@ The Gemini free-tier includes strict rate limits (e.g., `gemini-3.8-flash` has a
 - *"Show the first 10 records from &lt;your_table&gt;."*
 - *"How many entries are recorded in &lt;your_table&gt;?"*
 - *"What is the distribution of &lt;category_column&gt; in &lt;your_table&gt;?"*
+
+## Team Members
+
+| S. No. | Name | Role |
+|---|---|---|
+| 1 | Shalika RR | Project Development |
+| 2 | Pranitha Arun | Database and SQL |
+| 3 | Varnika | Testing and Documentation |
+
+
